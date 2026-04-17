@@ -1,0 +1,147 @@
+basePath: /
+definitions:
+  bike.Bike:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      model:
+        type: string
+      price_per_hour:
+        type: integer
+      rented_at:
+        type: string
+      rented_until:
+        type: string
+    type: object
+  bike.CreateBike:
+    properties:
+      model:
+        type: string
+      price_per_hour:
+        type: integer
+      rented_at:
+        type: string
+      rented_until:
+        type: string
+    type: object
+  bike.UpdateBike:
+    properties:
+      model:
+        type: string
+      price_per_hour:
+        type: integer
+      rented_at:
+        type: string
+      rented_until:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a bike rental service API.
+  title: Bike Rental API
+  version: "1.0"
+paths:
+  /bike:
+    get:
+      description: get all bikes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/bike.Bike'
+            type: array
+      summary: List bikes
+      tags:
+      - bikes
+    post:
+      consumes:
+      - application/json
+      description: create a new bike
+      parameters:
+      - description: Bike payload
+        in: body
+        name: bike
+        required: true
+        schema:
+          $ref: '#/definitions/bike.CreateBike'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/bike.Bike'
+        "422":
+          description: invalid request
+          schema:
+            type: string
+        "500":
+          description: unexpected error
+          schema:
+            type: string
+      summary: Create bike
+      tags:
+      - bikes
+  /bike/{id}:
+    get:
+      parameters:
+      - description: Bike ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/bike.Bike'
+        "422":
+          description: invalid id
+          schema:
+            type: string
+      summary: Get bike by ID
+      tags:
+      - bikes
+    put:
+      consumes:
+      - application/json
+      description: update an existing bike
+      parameters:
+      - description: Bike ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Bike payload
+        in: body
+        name: bike
+        required: true
+        schema:
+          $ref: '#/definitions/bike.UpdateBike'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/bike.Bike'
+        "422":
+          description: invalid id or request
+          schema:
+            type: string
+        "500":
+          description: unexpected error
+          schema:
+            type: string
+      summary: Update bike
+      tags:
+      - bikes
+swagger: "2.0"

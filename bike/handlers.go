@@ -1,0 +1,165 @@
+package bike
+
+import (
+	"net/http"
+
+	"github.com/MauroRaya/bike-rental-api/httputil"
+)
+
+type handler struct {
+	service Service
+}
+
+type Handler interface {
+	ListBikes(w http.ResponseWriter, r *http.Request)
+	FindBikeByID(w http.ResponseWriter, r *http.Request)
+	CreateBike(w http.ResponseWriter, r *http.Request)
+	UpdateBike(w http.ResponseWriter, r *http.Request)
+	DeleteBike(w http.ResponseWriter, r *http.Request)
+}
+
+func NewHandler(service Service) Handler {
+	return &handler{service}
+}
+
+// ListBikes godoc
+// @Summary List bikes
+// @Description get all bikes
+// @Tags bikes
+// @Produce json
+// @Success 200 {array} bike.Bike
+// @Router /bike [get]
+func (h *handler) ListBikes(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	bikes, err := h.service.ListBikes(ctx)
+	if err != nil {
+		http.Error(w, "unexpected error", http.StatusInternalServerError)
+		return
+	}
+
+	httputil.EncodeJSON(w, http.StatusOK, bikes)
+}
+
+// FindBikeByID godoc
+// @Summary Get bike by ID
+// @Tags bikes
+// @Produce json
+// @Param id path int true "Bike ID"
+// @Success 200 {object} bike.Bike
+// @Failure 422 {string} string "invalid id"
+// @Router /bike/{id} [get]
+func (h *handler) FindBikeByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id, err := httputil.ParsePathID(r)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusUnprocessableEntity)
+		return
+	}
+
+	bike, err := h.service.FindBikeByID(ctx, id)
+	if err != nil {
+		http.Error(w, "unexpected error", http.StatusInternalServerError)
+		return
+	}
+
+	httputil.EncodeJSON(w, http.StatusOK, bike)
+}
+
+// CreateBike godoc
+// @Summary Create bike
+// @Description create a new bike
+// @Tags bikes
+// @Accept json
+// @Produce json
+// @Param bike body bike.CreateBike true "Bike payload"
+// @Success 201 {object} bike.Bike
+// @Failure 422 {string} string "invalid request"
+// @Failure 500 {string} string "unexpected error"
+// @Router /bike [post]
+func (h *handler) CreateBike(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var payload CreateBike
+
+	if err := httputil.DecodeJSON(r, &payload); err != nil {
+		http.Error(w, "invalid request", http.StatusUnprocessableEntity)
+		return
+	}
+
+	bike, err := h.service.CreateBike(ctx, payload)
+	if err != nil {
+		http.Error(w, "unexpected error", http.StatusInternalServerError)
+		return
+	}
+
+	httputil.EncodeJSON(w, http.StatusCreated, bike)
+}
+
+// UpdateBike godoc
+// @Summary Update bike
+// @Description update an existing bike
+// @Tags bikes
+// @Accept json
+// @Produce json
+// @Param id path int true "Bike ID"
+// @Param bike body bike.UpdateBike true "Bike payload"
+// @Success 200 {object} bike.Bike
+// @Failure 422 {string} string "invalid id or request"
+// @Failure 500 {string} string "unexpected error"
+// @Router /bike/{id} [put]
+func (h *handler) UpdateBike(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id, err := httputil.ParsePathID(r)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusUnprocessableEntity)
+		return
+	}
+
+	var payload UpdateBike
+
+	if err := httputil.DecodeJSON(r, &payload); err != nil {
+		http.Error(w, "invalid request", http.StatusUnprocessableEntity)
+		return
+	}
+
+	bike, err := h.service.UpdateBike(ctx, payload, id)
+	if err != nil {
+		http.Error(w, "unexpected error", http.StatusInternalServerError)
+		return
+	}
+
+	httputil.EncodeJSON(w, http.StatusOK, bike)
+}
+
+// UpdateBike godoc
+// @Summary Update bike
+// @Description update an existing bike
+// @Tags bikes
+// @Accept json
+// @Produce json
+// @Param id path int true "Bike ID"
+// @Param bike body bike.UpdateBike true "Bike payload"
+// @Success 200 {object} bike.Bike
+// @Failure 422 {string} string "invalid id or request"
+// @Failure 500 {string} string "unexpected error"
+// @Router /bike/{id} [put]
+func (h *handler) DeleteBike(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id, err := httputil.ParsePathID(r)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusUnprocessableEntity)
+		return
+	}
+
+	bike, err := h.service.DeleteBike(ctx, id)
+	if err != nil {
+		http.Error(w, "unexpected error", http.StatusInternalServerError)
+		return
+	}
+
+	httputil.EncodeJSON(w, http.StatusOK, bike)
+}
