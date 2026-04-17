@@ -44,8 +44,8 @@ func mountPing(r Router) {
 	})
 }
 
-func mountSwagger(r Router, port int32) {
-	url := fmt.Sprintf("http://localhost:%d/swagger/doc.json", port)
+func mountSwagger(r Router, port string) {
+	url := fmt.Sprintf("http://localhost:%s/swagger/doc.json", port)
 
 	r.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL(url),
@@ -64,8 +64,8 @@ func mountBikeRoutes(r Router, conn *pgx.Conn) {
 	r.Delete("/bike/{id}", bikeHandler.DeleteBike)
 }
 
-func run(h http.Handler, port int32) error {
-	addr := fmt.Sprintf(":%d", port)
+func run(h http.Handler, port string) error {
+	addr := fmt.Sprintf(":%s", port)
 
 	srv := &http.Server{
 		Addr:         addr,
@@ -86,7 +86,7 @@ func run(h http.Handler, port int32) error {
 func main() {
 	ctx := context.Background()
 
-	env, err := env.Load(".env", true)
+	env, err := env.Load()
 	if err != nil {
 		slog.Error("failed loading .env file", "error", err)
 		os.Exit(1)
