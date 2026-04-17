@@ -1,0 +1,224 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a bike rental service API.",
+        "title": "Bike Rental API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/bike": {
+            "get": {
+                "description": "get all bikes",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bikes"
+                ],
+                "summary": "List bikes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/bike.Bike"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create a new bike",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bikes"
+                ],
+                "summary": "Create bike",
+                "parameters": [
+                    {
+                        "description": "Bike payload",
+                        "name": "bike",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/bike.CreateBike"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/bike.Bike"
+                        }
+                    },
+                    "422": {
+                        "description": "invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/bike/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bikes"
+                ],
+                "summary": "Get bike by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Bike ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/bike.Bike"
+                        }
+                    },
+                    "422": {
+                        "description": "invalid id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "update an existing bike",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bikes"
+                ],
+                "summary": "Update bike",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Bike ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Bike payload",
+                        "name": "bike",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/bike.UpdateBike"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/bike.Bike"
+                        }
+                    },
+                    "422": {
+                        "description": "invalid id or request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "bike.Bike": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                },
+                "rented_at": {
+                    "type": "string"
+                },
+                "rented_until": {
+                    "type": "string"
+                }
+            }
+        },
+        "bike.CreateBike": {
+            "type": "object",
+            "properties": {
+                "model": {
+                    "type": "string"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                },
+                "rented_at": {
+                    "type": "string"
+                },
+                "rented_until": {
+                    "type": "string"
+                }
+            }
+        },
+        "bike.UpdateBike": {
+            "type": "object",
+            "properties": {
+                "model": {
+                    "type": "string"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                },
+                "rented_at": {
+                    "type": "string"
+                },
+                "rented_until": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
