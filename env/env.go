@@ -1,94 +1,50 @@
 package env
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
-	"strconv"
-	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type Env struct {
-	DSN  string
-	Port int32
+	PostgresUser     string
+	PostgresPassword string
+	PostgresDB       string
+	PostgresPort     string
+	DSN              string
+	Port             string
 }
 
-func parse(file io.Reader) map[string]string {
-	scanner := bufio.NewScanner(file)
-	envs := make(map[string]string)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		i := strings.Index(line, "=")
-
-		if i == -1 {
-			continue
-		}
-
-		key := line[:i]
-		value := line[i+1:]
-
-		envs[key] = value
+func mustGet(key string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		panic(fmt.Sprintf("missing required env: %s", key))
 	}
-
-	return envs
+	return v
 }
 
-func sets(envs map[string]string) error {
-	for k, v := range envs {
-		if err := os.Setenv(k, v); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func validate(envs map[string]string, env *Env) error {
-	value, ok := envs["DSN"]
-	if !ok {
-		return fmt.Errorf("env DSN is not set")
-	}
-	env.DSN = value
-
-	value, ok = envs["PORT"]
-	if !ok {
-		return fmt.Errorf("env PORT is not set")
-	}
-
-	port, err := strconv.ParseInt(value, 10, 32)
+func Load() (Env, error) {
+	err := godotenv.Load()
 	if err != nil {
-		return fmt.Errorf("env PORT is not int32")
-	}
-	env.Port = int32(port)
-
-	return nil
-}
-
-func Load(fileName string, shouldValidate bool) (Env, error) {
-	var env Env
-
-	file, err := os.Open(fileName)
-	if err != nil {
-		return env, err
-	}
-	defer file.Close()
-
-	envs := parse(file)
-
-	if err := sets(envs); err != nil {
-		return env, err
+		return Env{}, err
 	}
 
-	if err := validate(envs, &env); err != nil {
-		return env, err
+	env := Env{
+		PostgresUser:     mustGet("POSTGRES_USER"),
+		PostgresPassword: mustGet("POSTGRES_PASSWORD"),
+		PostgresDB:       mustGet("POSTGRES_DB"),
+		PostgresPort:     mustGet("POSTGRES_PORT"),
+		Port:             mustGet("PORT"),
 	}
+
+	env.DSN = fmt.Sprintf(
+		"host=localhost port=%s user=%s password=%s dbname=%s sslmode=disable",
+		env.PostgresPort,
+		env.PostgresUser,
+		env.PostgresPassword,
+		env.PostgresDB,
+	)
 
 	return env, nil
 }
