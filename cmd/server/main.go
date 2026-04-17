@@ -1,0 +1,112 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/MauroRaya/bike-rental-api/bike"
+	_ "github.com/MauroRaya/bike-rental-api/docs"
+	"github.com/MauroRaya/bike-rental-api/env"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5"
+	httpSwagger "github.com/swaggo/http-swagger"
+)
+
+type Router interface {
+	Get(pattern string, handler http.HandlerFunc)
+	Post(pattern string, handler http.HandlerFunc)
+	Put(pattern string, handler http.HandlerFunc)
+	Delete(pattern string, handler http.HandlerFunc)
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+}
+
+func mount() Router {
+	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	return r
+}
+
+func mountPing(r Router) {
+	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("pong"))
+	})
+}
+
+func mountSwagger(r Router, port int32) {
+	url := fmt.Sprintf("http://localhost:%d/swagger/doc.json", port)
+
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL(url),
+	))
+}
+
+func mountBikeRoutes(r Router, conn *pgx.Conn) {
+	bikeRepository := bike.NewRepository(conn)
+	bikeService := bike.NewService(bikeRepository)
+	bikeHandler := bike.NewHandler(bikeService)
+
+	r.Get("/bike", bikeHandler.ListBikes)
+	r.Get("/bike/{id}", bikeHandler.FindBikeByID)
+	r.Post("/bike", bikeHandler.CreateBike)
+	r.Put("/bike/{id}", bikeHandler.UpdateBike)
+	r.Delete("/bike/{id}", bikeHandler.DeleteBike)
+}
+
+func run(h http.Handler, port int32) error {
+	addr := fmt.Sprintf(":%d", port)
+
+	srv := &http.Server{
+		Addr:         addr,
+		Handler:      h,
+		WriteTimeout: time.Second * 30,
+		ReadTimeout:  time.Second * 10,
+		IdleTimeout:  time.Minute,
+	}
+
+	return srv.ListenAndServe()
+}
+
+// @title Bike Rental API
+// @version 1.0
+// @description This is a bike rental service API.
+// @host localhost:8080
+// @BasePath /
+func main() {
+	ctx := context.Background()
+
+	env, err := env.Load(".env", true)
+	if err != nil {
+		slog.Error("failed loading .env file", "error", err)
+		os.Exit(1)
+	}
+
+	conn, err := pgx.Connect(ctx, env.DSN)
+	if err != nil {
+		slog.Error("failed connecting to database", "error", err)
+		os.Exit(1)
+	}
+	defer conn.Close(ctx)
+
+	router := mount()
+
+	mountPing(router)
+	mountSwagger(router, env.Port)
+	mountBikeRoutes(router, conn)
+
+	if err := run(router, env.Port); err != nil {
+		slog.Error("failed starting the server", "error", err)
+		os.Exit(1)
+	}
+}
