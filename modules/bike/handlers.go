@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/MauroRaya/bike-rental-api/httputil"
+	repo "github.com/MauroRaya/bike-rental-api/sqlc"
 )
 
 type handler struct {
@@ -81,7 +82,7 @@ func (h *handler) FindBikeByID(w http.ResponseWriter, r *http.Request) {
 func (h *handler) CreateBike(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var payload CreateBike
+	var payload repo.CreateBikeParams
 
 	if err := httputil.DecodeJSON(r, &payload); err != nil {
 		http.Error(w, "invalid request", http.StatusUnprocessableEntity)
@@ -103,29 +104,22 @@ func (h *handler) CreateBike(w http.ResponseWriter, r *http.Request) {
 // @Tags bikes
 // @Accept json
 // @Produce json
-// @Param id path int true "Bike ID"
 // @Param bike body bike.UpdateBike true "Bike payload"
 // @Success 200 {object} bike.Bike
-// @Failure 422 {string} string "invalid id or request"
+// @Failure 422 {string} string "invalid request"
 // @Failure 500 {string} string "unexpected error"
-// @Router /bike/{id} [put]
+// @Router /bike [put]
 func (h *handler) UpdateBike(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	id, err := httputil.ParsePathID(r)
-	if err != nil {
-		http.Error(w, "invalid id", http.StatusUnprocessableEntity)
-		return
-	}
-
-	var payload UpdateBike
+	var payload repo.UpdateBikeParams
 
 	if err := httputil.DecodeJSON(r, &payload); err != nil {
 		http.Error(w, "invalid request", http.StatusUnprocessableEntity)
 		return
 	}
 
-	bike, err := h.service.UpdateBike(ctx, payload, id)
+	bike, err := h.service.UpdateBike(ctx, payload)
 	if err != nil {
 		http.Error(w, "unexpected error", http.StatusInternalServerError)
 		return
