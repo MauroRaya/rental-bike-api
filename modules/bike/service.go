@@ -3,26 +3,28 @@ package bike
 import (
 	"context"
 	"log/slog"
+
+	repo "github.com/MauroRaya/bike-rental-api/sqlc"
 )
 
 type service struct {
-	repository Repository
+	repo repo.Querier
 }
 
 type Service interface {
-	ListBikes(ctx context.Context) ([]Bike, error)
-	FindBikeByID(ctx context.Context, id int32) (Bike, error)
-	CreateBike(ctx context.Context, arg CreateBike) (Bike, error)
-	UpdateBike(ctx context.Context, arg UpdateBike, id int32) (Bike, error)
-	DeleteBike(ctx context.Context, id int32) (Bike, error)
+	ListBikes(ctx context.Context) ([]repo.Bike, error)
+	FindBikeByID(ctx context.Context, id int32) (repo.Bike, error)
+	CreateBike(ctx context.Context, arg repo.CreateBikeParams) (repo.Bike, error)
+	UpdateBike(ctx context.Context, arg repo.UpdateBikeParams) (repo.Bike, error)
+	DeleteBike(ctx context.Context, id int32) (repo.Bike, error)
 }
 
-func NewService(repository Repository) Service {
-	return &service{repository}
+func NewService(repo repo.Querier) Service {
+	return &service{repo}
 }
 
-func (s *service) ListBikes(ctx context.Context) ([]Bike, error) {
-	bikes, err := s.repository.ListBikes(ctx)
+func (s *service) ListBikes(ctx context.Context) ([]repo.Bike, error) {
+	bikes, err := s.repo.ListBikes(ctx)
 	if err != nil {
 		slog.Error("failed to list bikes", "error", err)
 		return bikes, err
@@ -30,8 +32,8 @@ func (s *service) ListBikes(ctx context.Context) ([]Bike, error) {
 	return bikes, nil
 }
 
-func (s *service) FindBikeByID(ctx context.Context, id int32) (Bike, error) {
-	bike, err := s.repository.FindBikeByID(ctx, id)
+func (s *service) FindBikeByID(ctx context.Context, id int32) (repo.Bike, error) {
+	bike, err := s.repo.FindBikeByID(ctx, id)
 	if err != nil {
 		slog.Error("failed to find bike", "error", err)
 		return bike, err
@@ -39,8 +41,8 @@ func (s *service) FindBikeByID(ctx context.Context, id int32) (Bike, error) {
 	return bike, nil
 }
 
-func (s *service) CreateBike(ctx context.Context, arg CreateBike) (Bike, error) {
-	bike, err := s.repository.CreateBike(ctx, arg)
+func (s *service) CreateBike(ctx context.Context, arg repo.CreateBikeParams) (repo.Bike, error) {
+	bike, err := s.repo.CreateBike(ctx, arg)
 	if err != nil {
 		slog.Error("failed to create bike", "error", err)
 		return bike, err
@@ -48,8 +50,8 @@ func (s *service) CreateBike(ctx context.Context, arg CreateBike) (Bike, error) 
 	return bike, nil
 }
 
-func (s *service) UpdateBike(ctx context.Context, arg UpdateBike, id int32) (Bike, error) {
-	bike, err := s.repository.UpdateBike(ctx, arg, id)
+func (s *service) UpdateBike(ctx context.Context, arg repo.UpdateBikeParams) (repo.Bike, error) {
+	bike, err := s.repo.UpdateBike(ctx, arg)
 	if err != nil {
 		slog.Error("failed to update bike", "error", err)
 		return bike, err
@@ -57,8 +59,8 @@ func (s *service) UpdateBike(ctx context.Context, arg UpdateBike, id int32) (Bik
 	return bike, nil
 }
 
-func (s *service) DeleteBike(ctx context.Context, id int32) (Bike, error) {
-	bike, err := s.repository.DeleteBike(ctx, id)
+func (s *service) DeleteBike(ctx context.Context, id int32) (repo.Bike, error) {
+	bike, err := s.repo.DeleteBike(ctx, id)
 	if err != nil {
 		slog.Error("failed to delete bike", "error", err)
 		return bike, err
