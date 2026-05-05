@@ -75,6 +75,9 @@ func run(h http.Handler, port string) error {
 		IdleTimeout:  time.Minute,
 	}
 
+	msg := fmt.Sprintf("starting server in port %s", port)
+	slog.Info(msg)
+
 	return srv.ListenAndServe()
 }
 
