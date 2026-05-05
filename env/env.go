@@ -8,12 +8,15 @@ import (
 )
 
 type Env struct {
-	PostgresUser     string
-	PostgresPassword string
-	PostgresDB       string
-	PostgresPort     string
-	DSN              string
-	Port             string
+	PostgresUser      string
+	PostgresPassword  string
+	PostgresDB        string
+	PostgresPort      string
+	GooseDriver       string
+	GooseDbstring     string
+	GooseMigrationDir string
+	DSN               string
+	Port              string
 }
 
 func mustGet(key string) string {
@@ -31,11 +34,14 @@ func Load() (Env, error) {
 	}
 
 	env := Env{
-		PostgresUser:     mustGet("POSTGRES_USER"),
-		PostgresPassword: mustGet("POSTGRES_PASSWORD"),
-		PostgresDB:       mustGet("POSTGRES_DB"),
-		PostgresPort:     mustGet("POSTGRES_PORT"),
-		Port:             mustGet("PORT"),
+		PostgresUser:      mustGet("POSTGRES_USER"),
+		PostgresPassword:  mustGet("POSTGRES_PASSWORD"),
+		PostgresDB:        mustGet("POSTGRES_DB"),
+		PostgresPort:      mustGet("POSTGRES_PORT"),
+		GooseDriver:       mustGet("GOOSE_DRIVER"),
+		GooseDbstring:     mustGet("GOOSE_DBSTRING"),
+		GooseMigrationDir: mustGet("GOOSE_MIGRATION_DIR"),
+		Port:              mustGet("PORT"),
 	}
 
 	env.DSN = fmt.Sprintf(
