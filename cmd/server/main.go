@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/MauroRaya/bike-rental-api/bike"
 	_ "github.com/MauroRaya/bike-rental-api/docs"
 	"github.com/MauroRaya/bike-rental-api/env"
+	"github.com/MauroRaya/bike-rental-api/modules/bike"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5"
