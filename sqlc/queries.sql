@@ -36,3 +36,19 @@ DELETE FROM
 WHERE
     id = $1
 RETURNING id, model, price_per_hour, rented_at, rented_until, created_at;
+
+-- name: FindUserByEmail :one
+SELECT
+    id, email, hash
+FROM
+    users
+WHERE
+    email = $1;
+
+-- name: CreateUser :one
+INSERT INTO users (
+    email, hash
+) VALUES (
+    $1, $2
+)
+RETURNING id, email;
