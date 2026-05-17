@@ -19,6 +19,7 @@ cd rental-bike-api
 
 ### 3. Configure o arquivo `.env` na raiz do projeto, conforme o arquivo `.env.example`.
 ```bash
+POSTGRES_HOST=localhost
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=postgres
@@ -27,6 +28,8 @@ POSTGRES_PORT=5432
 GOOSE_DRIVER=postgres
 GOOSE_DBSTRING=host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable
 GOOSE_MIGRATION_DIR=./migrations
+
+JWT_SECRET=jwt-secret
 
 PORT=8080
 ```
