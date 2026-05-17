@@ -16,6 +16,7 @@ type Env struct {
 	GooseDbstring     string
 	GooseMigrationDir string
 	DSN               string
+	JwtSecret         string
 	Port              string
 }
 
@@ -41,6 +42,7 @@ func Load() (Env, error) {
 		GooseDriver:       mustGet("GOOSE_DRIVER"),
 		GooseDbstring:     mustGet("GOOSE_DBSTRING"),
 		GooseMigrationDir: mustGet("GOOSE_MIGRATION_DIR"),
+		JwtSecret:         mustGet("JWT_SECRET"),
 		Port:              mustGet("PORT"),
 	}
 
