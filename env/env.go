@@ -8,6 +8,7 @@ import (
 )
 
 type Env struct {
+	PostgresHost      string
 	PostgresUser      string
 	PostgresPassword  string
 	PostgresDB        string
@@ -35,6 +36,7 @@ func Load() (Env, error) {
 	}
 
 	env := Env{
+		PostgresHost:      mustGet("POSTGRES_HOST"),
 		PostgresUser:      mustGet("POSTGRES_USER"),
 		PostgresPassword:  mustGet("POSTGRES_PASSWORD"),
 		PostgresDB:        mustGet("POSTGRES_DB"),
@@ -47,7 +49,8 @@ func Load() (Env, error) {
 	}
 
 	env.DSN = fmt.Sprintf(
-		"host=localhost port=%s user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		env.PostgresHost,
 		env.PostgresPort,
 		env.PostgresUser,
 		env.PostgresPassword,
