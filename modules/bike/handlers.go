@@ -25,10 +25,11 @@ func NewHandler(service Service) Handler {
 
 // ListBikes godoc
 // @Summary List bikes
-// @Description get all bikes
-// @Tags bikes
+// @Description Get all bikes
+// @Tags bike
 // @Produce json
-// @Success 200 {array} bike.Bike
+// @Success 200 {array} repo.Bike
+// @Failure 500 {string} string
 // @Router /bike [get]
 func (h *handler) ListBikes(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -43,12 +44,14 @@ func (h *handler) ListBikes(w http.ResponseWriter, r *http.Request) {
 }
 
 // FindBikeByID godoc
-// @Summary Get bike by ID
-// @Tags bikes
+// @Summary Find bike by ID
+// @Description Get a bike by ID
+// @Tags bike
 // @Produce json
 // @Param id path int true "Bike ID"
-// @Success 200 {object} bike.Bike
-// @Failure 422 {string} string "invalid id"
+// @Success 200 {object} repo.Bike
+// @Failure 422 {string} string
+// @Failure 500 {string} string
 // @Router /bike/{id} [get]
 func (h *handler) FindBikeByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -70,14 +73,14 @@ func (h *handler) FindBikeByID(w http.ResponseWriter, r *http.Request) {
 
 // CreateBike godoc
 // @Summary Create bike
-// @Description create a new bike
-// @Tags bikes
+// @Description Create a new bike
+// @Tags bike
 // @Accept json
 // @Produce json
-// @Param bike body bike.CreateBike true "Bike payload"
-// @Success 201 {object} bike.Bike
-// @Failure 422 {string} string "invalid request"
-// @Failure 500 {string} string "unexpected error"
+// @Param payload body repo.CreateBikeParams true "Bike payload"
+// @Success 201 {object} repo.Bike
+// @Failure 422 {string} string
+// @Failure 500 {string} string
 // @Router /bike [post]
 func (h *handler) CreateBike(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -100,15 +103,16 @@ func (h *handler) CreateBike(w http.ResponseWriter, r *http.Request) {
 
 // UpdateBike godoc
 // @Summary Update bike
-// @Description update an existing bike
-// @Tags bikes
+// @Description Update a bike
+// @Tags bike
 // @Accept json
 // @Produce json
-// @Param bike body bike.UpdateBike true "Bike payload"
-// @Success 200 {object} bike.Bike
-// @Failure 422 {string} string "invalid request"
-// @Failure 500 {string} string "unexpected error"
-// @Router /bike [put]
+// @Param id path int true "Bike ID"
+// @Param payload body repo.UpdateBikeParams true "Bike payload"
+// @Success 200 {object} repo.Bike
+// @Failure 422 {string} string
+// @Failure 500 {string} string
+// @Router /bike/{id} [put]
 func (h *handler) UpdateBike(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -130,15 +134,15 @@ func (h *handler) UpdateBike(w http.ResponseWriter, r *http.Request) {
 
 // UpdateBike godoc
 // @Summary Update bike
-// @Description update an existing bike
-// @Tags bikes
+// @Description Update a bike
+// @Tags bike
 // @Accept json
 // @Produce json
 // @Param id path int true "Bike ID"
-// @Param bike body bike.UpdateBike true "Bike payload"
-// @Success 200 {object} bike.Bike
-// @Failure 422 {string} string "invalid id or request"
-// @Failure 500 {string} string "unexpected error"
+// @Param payload body repo.UpdateBikeParams true "Bike payload"
+// @Success 200 {object} repo.Bike
+// @Failure 422 {string} string
+// @Failure 500 {string} string
 // @Router /bike/{id} [put]
 func (h *handler) DeleteBike(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

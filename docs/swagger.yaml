@@ -1,9 +1,49 @@
 basePath: /
 definitions:
-  bike.Bike:
+  auth.SignInParams:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.SignInResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  auth.SignUpParams:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  pgtype.InfinityModifier:
+    enum:
+    - 1
+    - 0
+    - -1
+    format: int32
+    type: integer
+    x-enum-varnames:
+    - Infinity
+    - Finite
+    - NegativeInfinity
+  pgtype.Timestamp:
+    properties:
+      infinityModifier:
+        $ref: '#/definitions/pgtype.InfinityModifier'
+      time:
+        description: Time zone will be ignored when encoding to PostgreSQL.
+        type: string
+      valid:
+        type: boolean
+    type: object
+  repo.Bike:
     properties:
       created_at:
-        type: string
+        $ref: '#/definitions/pgtype.Timestamp'
       id:
         type: integer
       model:
@@ -11,31 +51,40 @@ definitions:
       price_per_hour:
         type: integer
       rented_at:
-        type: string
+        $ref: '#/definitions/pgtype.Timestamp'
       rented_until:
-        type: string
+        $ref: '#/definitions/pgtype.Timestamp'
     type: object
-  bike.CreateBike:
+  repo.CreateBikeParams:
     properties:
       model:
         type: string
       price_per_hour:
         type: integer
       rented_at:
-        type: string
+        $ref: '#/definitions/pgtype.Timestamp'
       rented_until:
-        type: string
+        $ref: '#/definitions/pgtype.Timestamp'
     type: object
-  bike.UpdateBike:
+  repo.CreateUserRow:
     properties:
+      email:
+        type: string
+      id:
+        type: integer
+    type: object
+  repo.UpdateBikeParams:
+    properties:
+      id:
+        type: integer
       model:
         type: string
       price_per_hour:
         type: integer
       rented_at:
-        type: string
+        $ref: '#/definitions/pgtype.Timestamp'
       rented_until:
-        type: string
+        $ref: '#/definitions/pgtype.Timestamp'
     type: object
 host: localhost:8080
 info:
@@ -44,9 +93,69 @@ info:
   title: Bike Rental API
   version: "1.0"
 paths:
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user
+      parameters:
+      - description: Sign in payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/auth.SignInParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.SignInResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Sign in
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: Sign up payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/auth.SignUpParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repo.CreateUserRow'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Sign up
+      tags:
+      - auth
   /bike:
     get:
-      description: get all bikes
+      description: Get all bikes
       produces:
       - application/json
       responses:
@@ -54,42 +163,47 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/bike.Bike'
+              $ref: '#/definitions/repo.Bike'
             type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
       summary: List bikes
       tags:
-      - bikes
+      - bike
     post:
       consumes:
       - application/json
-      description: create a new bike
+      description: Create a new bike
       parameters:
       - description: Bike payload
         in: body
-        name: bike
+        name: payload
         required: true
         schema:
-          $ref: '#/definitions/bike.CreateBike'
+          $ref: '#/definitions/repo.CreateBikeParams'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/bike.Bike'
+            $ref: '#/definitions/repo.Bike'
         "422":
-          description: invalid request
+          description: Unprocessable Entity
           schema:
             type: string
         "500":
-          description: unexpected error
+          description: Internal Server Error
           schema:
             type: string
       summary: Create bike
       tags:
-      - bikes
+      - bike
   /bike/{id}:
     get:
+      description: Get a bike by ID
       parameters:
       - description: Bike ID
         in: path
@@ -102,18 +216,22 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/bike.Bike'
+            $ref: '#/definitions/repo.Bike'
         "422":
-          description: invalid id
+          description: Unprocessable Entity
           schema:
             type: string
-      summary: Get bike by ID
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Find bike by ID
       tags:
-      - bikes
+      - bike
     put:
       consumes:
       - application/json
-      description: update an existing bike
+      description: Update a bike
       parameters:
       - description: Bike ID
         in: path
@@ -122,26 +240,26 @@ paths:
         type: integer
       - description: Bike payload
         in: body
-        name: bike
+        name: payload
         required: true
         schema:
-          $ref: '#/definitions/bike.UpdateBike'
+          $ref: '#/definitions/repo.UpdateBikeParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/bike.Bike'
+            $ref: '#/definitions/repo.Bike'
         "422":
-          description: invalid id or request
+          description: Unprocessable Entity
           schema:
             type: string
         "500":
-          description: unexpected error
+          description: Internal Server Error
           schema:
             type: string
       summary: Update bike
       tags:
-      - bikes
+      - bike
 swagger: "2.0"

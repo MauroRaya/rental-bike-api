@@ -15,14 +15,106 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/bike": {
-            "get": {
-                "description": "get all bikes",
+        "/auth/sign-in": {
+            "post": {
+                "description": "Authenticate user",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "bikes"
+                    "auth"
+                ],
+                "summary": "Sign in",
+                "parameters": [
+                    {
+                        "description": "Sign in payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignInParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignInResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sign-up": {
+            "post": {
+                "description": "Create a new user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign up",
+                "parameters": [
+                    {
+                        "description": "Sign up payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.SignUpParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/repo.CreateUserRow"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/bike": {
+            "get": {
+                "description": "Get all bikes",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bike"
                 ],
                 "summary": "List bikes",
                 "responses": {
@@ -31,14 +123,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/bike.Bike"
+                                "$ref": "#/definitions/repo.Bike"
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
             },
             "post": {
-                "description": "create a new bike",
+                "description": "Create a new bike",
                 "consumes": [
                     "application/json"
                 ],
@@ -46,17 +144,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "bikes"
+                    "bike"
                 ],
                 "summary": "Create bike",
                 "parameters": [
                     {
                         "description": "Bike payload",
-                        "name": "bike",
+                        "name": "payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/bike.CreateBike"
+                            "$ref": "#/definitions/repo.CreateBikeParams"
                         }
                     }
                 ],
@@ -64,17 +162,17 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/bike.Bike"
+                            "$ref": "#/definitions/repo.Bike"
                         }
                     },
                     "422": {
-                        "description": "invalid request",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "unexpected error",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
                         }
@@ -84,13 +182,14 @@ const docTemplate = `{
         },
         "/bike/{id}": {
             "get": {
+                "description": "Get a bike by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "bikes"
+                    "bike"
                 ],
-                "summary": "Get bike by ID",
+                "summary": "Find bike by ID",
                 "parameters": [
                     {
                         "type": "integer",
@@ -104,11 +203,17 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/bike.Bike"
+                            "$ref": "#/definitions/repo.Bike"
                         }
                     },
                     "422": {
-                        "description": "invalid id",
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
                         }
@@ -116,7 +221,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "update an existing bike",
+                "description": "Update a bike",
                 "consumes": [
                     "application/json"
                 ],
@@ -124,7 +229,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "bikes"
+                    "bike"
                 ],
                 "summary": "Update bike",
                 "parameters": [
@@ -137,11 +242,11 @@ const docTemplate = `{
                     },
                     {
                         "description": "Bike payload",
-                        "name": "bike",
+                        "name": "payload",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/bike.UpdateBike"
+                            "$ref": "#/definitions/repo.UpdateBikeParams"
                         }
                     }
                 ],
@@ -149,17 +254,17 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/bike.Bike"
+                            "$ref": "#/definitions/repo.Bike"
                         }
                     },
                     "422": {
-                        "description": "invalid id or request",
+                        "description": "Unprocessable Entity",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "unexpected error",
+                        "description": "Internal Server Error",
                         "schema": {
                             "type": "string"
                         }
@@ -169,11 +274,70 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "bike.Bike": {
+        "auth.SignInParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.SignInResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.SignUpParams": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "pgtype.InfinityModifier": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+                1,
+                0,
+                -1
+            ],
+            "x-enum-varnames": [
+                "Infinity",
+                "Finite",
+                "NegativeInfinity"
+            ]
+        },
+        "pgtype.Timestamp": {
+            "type": "object",
+            "properties": {
+                "infinityModifier": {
+                    "$ref": "#/definitions/pgtype.InfinityModifier"
+                },
+                "time": {
+                    "description": "Time zone will be ignored when encoding to PostgreSQL.",
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "repo.Bike": {
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Timestamp"
                 },
                 "id": {
                     "type": "integer"
@@ -185,14 +349,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "rented_at": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Timestamp"
                 },
                 "rented_until": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Timestamp"
                 }
             }
         },
-        "bike.CreateBike": {
+        "repo.CreateBikeParams": {
             "type": "object",
             "properties": {
                 "model": {
@@ -202,16 +366,30 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "rented_at": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Timestamp"
                 },
                 "rented_until": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Timestamp"
                 }
             }
         },
-        "bike.UpdateBike": {
+        "repo.CreateUserRow": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "repo.UpdateBikeParams": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "model": {
                     "type": "string"
                 },
@@ -219,10 +397,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "rented_at": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Timestamp"
                 },
                 "rented_until": {
-                    "type": "string"
+                    "$ref": "#/definitions/pgtype.Timestamp"
                 }
             }
         }
